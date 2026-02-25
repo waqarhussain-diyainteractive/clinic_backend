@@ -69,11 +69,10 @@ async def update_clinic_database(data: ClinicDataInput):
 async def chat_with_bot(request: ChatRequest):
     user_message = request.message
     
-    # NEW: Get the real-world current day and tomorrow's day!
     current_day = datetime.now().strftime("%A").upper()
     tomorrow_day = (datetime.now() + timedelta(days=1)).strftime("%A").upper()
     
-    # AI Prompt: Now dynamically injects the real-time day!
+    # AI Prompt: Stricter rule for asking_for_cities added here!
     system_prompt = f"""
     You are an AI assistant for a clinic booking system. 
     Look closely at the chat history to carry over context (city, day, time, service) if it's missing from the newest message.
@@ -92,9 +91,9 @@ async def chat_with_bot(request: ChatRequest):
     - time: If they specify a time, extract it in 24-hour HH:MM format (e.g., "08:10", "14:00"). If they ask "all times", use "ALL". Otherwise "UNKNOWN".
     - service: Extract specific doctor types if mentioned (e.g. "Dentist", "General"). Otherwise "unknown".
     - asking_for_doctors: Set to true ONLY IF the NEWEST user message asks "which doctors are available?". Otherwise false.
-    - asking_for_cities: Set to true ONLY IF the NEWEST user message asks "which city", "what cities", "where is", or asks for available locations. Otherwise false.
-    - patient_name: e.g., "Ahmed" (default "")
-    - phone_number: e.g., "03001234567" (default "")
+    - asking_for_cities: Set to true ONLY IF the user explicitly asks a question to list cities (e.g., "what cities?", "which locations?"). If the user mentions a specific city (like "Amsterdam"), this MUST be false.
+    - patient_name: e.g., "Fahad" (default "")
+    - phone_number: e.g., "12345" (default "")
 
     Return ONLY a valid JSON object matching these keys.
     """
