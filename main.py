@@ -69,21 +69,32 @@ async def update_clinic_database(data: ClinicDataInput):
 async def chat_with_bot(request: ChatRequest):
     user_message = request.message
     
-    # AI Prompt: Added 'asking_for_cities' extraction and strict rules for empty cities
-    system_prompt = """
+    # NEW: Get the real-world current day and tomorrow's day!
+    current_day = datetime.now().strftime("%A").upper()
+    tomorrow_day = (datetime.now() + timedelta(days=1)).strftime("%A").upper()
+    
+    # AI Prompt: Now dynamically injects the real-time day!
+    system_prompt = f"""
     You are an AI assistant for a clinic booking system. 
     Look closely at the chat history to carry over context (city, day, time, service) if it's missing from the newest message.
+    
+    CRITICAL TIME CONTEXT:
+    - Today is {current_day}.
+    - Tomorrow is {tomorrow_day}.
     
     IMPORTANT EXTRACTION RULES FOR THE NEWEST MESSAGE:
     - intent: "search" or "book"
     - city: Extract the city name. Leave as "" if totally unknown. DO NOT write "Unknown".
-    - day: If they ask "which days", "show days", "all days", or "what days", YOU MUST OUTPUT "ALL". If they specify a single day (e.g., "MONDAY"), output that day. Otherwise "UNKNOWN".
+    - day: If they ask "which days", "show days", "all days", or "what days", YOU MUST OUTPUT "ALL". 
+           If they say "today", output "{current_day}".
+           If they say "tomorrow", output "{tomorrow_day}".
+           If they specify a single day (e.g., "MONDAY"), output that day. Otherwise "UNKNOWN".
     - time: If they specify a time, extract it in 24-hour HH:MM format (e.g., "08:10", "14:00"). If they ask "all times", use "ALL". Otherwise "UNKNOWN".
     - service: Extract specific doctor types if mentioned (e.g. "Dentist", "General"). Otherwise "unknown".
     - asking_for_doctors: Set to true ONLY IF the NEWEST user message asks "which doctors are available?". Otherwise false.
     - asking_for_cities: Set to true ONLY IF the NEWEST user message asks "which city", "what cities", "where is", or asks for available locations. Otherwise false.
-    - patient_name: e.g., "Fahad" (default "")
-    - phone_number: e.g., "12345" (default "")
+    - patient_name: e.g., "Ahmed" (default "")
+    - phone_number: e.g., "03001234567" (default "")
 
     Return ONLY a valid JSON object matching these keys.
     """
@@ -103,7 +114,6 @@ async def chat_with_bot(request: ChatRequest):
         ai_response = json.loads(chat_completion.choices[0].message.content)
         
         target_city = ai_response.get("city", "").strip().lower()
-        # Clean up cases where AI literally writes "unknown" for the city
         if target_city == "unknown" or target_city == "none": target_city = ""
             
         target_day = ai_response.get("day", "UNKNOWN").strip().upper()
@@ -114,7 +124,6 @@ async def chat_with_bot(request: ChatRequest):
         p_name = ai_response.get("patient_name", "").strip()
         p_phone = ai_response.get("phone_number", "").strip()
         
-        # Clean up time formatting (e.g., turn "8:10" into "08:10")
         if target_time not in ["UNKNOWN", "ALL"]:
             target_time = target_time.replace(".", ":")
             if len(target_time) == 4 and target_time[1] == ':': 
@@ -125,7 +134,6 @@ async def chat_with_bot(request: ChatRequest):
 
     db = load_clinic_data()
 
-    # --- NEW RULE: User asks WHICH CITY has a specific service ---
     if asking_for_cities:
         available_cities = set()
         for c in db.get("clinics", []):
@@ -142,7 +150,6 @@ async def chat_with_bot(request: ChatRequest):
         else:
             return {"status": "success", "message": "I'm sorry, we don't have that service available in any of our cities.", "slots": []}
 
-    # IF NO CITY PROVIDED YET
     if not target_city:
         return {"status": "success", "message": "I'd be happy to help you book an appointment! Which city are you looking for?", "slots": []}
 
