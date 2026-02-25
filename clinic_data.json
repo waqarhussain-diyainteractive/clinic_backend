@@ -1,0 +1,154 @@
+{
+    "clinics": [
+        {
+            "location_id": 55,
+            "clinic_name": "Clinic in Amsterdam City Centre",
+            "service": "Doctor Consultation (general)",
+            "streetAddress": "Spuistraat, 239C, 6, Amsterdam, Noord Holland",
+            "city": "Amsterdam",
+            "customerGuidelines": "Clinic is on the second floor",
+            "slots": [
+                {
+                    "slot_id": "S101",
+                    "day": "MONDAY",
+                    "startTime": "09:00",
+                    "endTime": "18:00",
+                    "breakStart": "13:00",
+                    "breakEnd": "14:00",
+                    "status": "available",
+                    "available": true
+                },
+                {
+                    "slot_id": "S102",
+                    "day": "TUESDAY",
+                    "startTime": "09:00",
+                    "endTime": "18:00",
+                    "breakStart": "13:00",
+                    "breakEnd": "14:00",
+                    "status": "available",
+                    "available": true
+                },
+                {
+                    "slot_id": "S103",
+                    "day": "WEDNESDAY",
+                    "startTime": "09:00",
+                    "endTime": "18:00",
+                    "breakStart": "13:00",
+                    "breakEnd": "14:00",
+                    "status": "available",
+                    "available": true
+                }
+            ]
+        },
+        {
+            "location_id": 74,
+            "clinic_name": "Dental Clinic Paris, City Centre",
+            "service": "Dentist consultation",
+            "streetAddress": "80 Avenue Ledru Rollin 75012 Paris",
+            "city": "Paris",
+            "customerGuidelines": "Please arrive 10 minutes early.",
+            "slots": [
+                {
+                    "slot_id": "S201",
+                    "day": "MONDAY",
+                    "startTime": "11:00",
+                    "endTime": "18:00",
+                    "breakStart": "14:00",
+                    "breakEnd": "15:00",
+                    "status": "available",
+                    "available": true
+                },
+                {
+                    "slot_id": "S202",
+                    "day": "TUESDAY",
+                    "startTime": "11:00",
+                    "endTime": "18:00",
+                    "breakStart": "14:00",
+                    "breakEnd": "15:00",
+                    "status": "available",
+                    "available": true
+                },
+                {
+                    "slot_id": "S203",
+                    "day": "FRIDAY",
+                    "startTime": "11:00",
+                    "endTime": "18:00",
+                    "breakStart": "14:00",
+                    "breakEnd": "15:00",
+                    "status": "available",
+                    "available": true
+                }
+            ]
+        },
+        {
+            "location_id": 76,
+            "clinic_name": "Clinic Munich, Old Town",
+            "service": "General Doctor Consultation",
+            "streetAddress": "Kaufingerstr. 12a/Marienplatz",
+            "city": "Munich",
+            "customerGuidelines": "Entrance via Thiereck courtyard. Close to Marienplatz.",
+            "slots": [
+                {
+                    "slot_id": "S301",
+                    "day": "MONDAY",
+                    "startTime": "08:30",
+                    "endTime": "17:00",
+                    "breakStart": "13:00",
+                    "breakEnd": "14:30",
+                    "status": "available",
+                    "available": true
+                },
+                {
+                    "slot_id": "S302",
+                    "day": "TUESDAY",
+                    "startTime": "08:30",
+                    "endTime": "17:00",
+                    "breakStart": "13:00",
+                    "breakEnd": "14:30",
+                    "status": "available",
+                    "available": true
+                },
+                {
+                    "slot_id": "S303",
+                    "day": "THURSDAY",
+                    "startTime": "08:30",
+                    "endTime": "17:00",
+                    "breakStart": "13:00",
+                    "breakEnd": "14:30",
+                    "status": "available",
+                    "available": true
+                }
+            ]
+        },
+        {
+            "location_id": 198,
+            "clinic_name": "Dental Clinic, Vaasa",
+            "service": "Dental consultation - Routine Check Up",
+            "streetAddress": "Gneissikuja 1 / Gneisgränden 1",
+            "city": "Vaasa",
+            "customerGuidelines": "Please ring the bell upon arrival.",
+            "slots": [
+                {
+                    "slot_id": "S401",
+                    "day": "MONDAY",
+                    "startTime": "09:00",
+                    "endTime": "17:00",
+                    "breakStart": "12:00",
+                    "breakEnd": "13:00",
+                    "status": "booked",
+                    "available": false
+                },
+                {
+                    "slot_id": "S402",
+                    "day": "WEDNESDAY",
+                    "startTime": "09:00",
+                    "endTime": "17:00",
+                    "breakStart": "12:00",
+                    "breakEnd": "13:00",
+                    "status": "booked",
+                    "available": false
+                }
+            ]
+        }
+    ]
+}
