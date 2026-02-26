@@ -72,7 +72,7 @@ async def chat_with_bot(request: ChatRequest):
     current_day = datetime.now().strftime("%A").upper()
     tomorrow_day = (datetime.now() + timedelta(days=1)).strftime("%A").upper()
     
-    # AI Prompt: Stricter rule for asking_for_cities added here!
+    # AI Prompt: Updated extraction rules to handle "available days and timings"
     system_prompt = f"""
     You are an AI assistant for a clinic booking system. 
     Look closely at the chat history to carry over context (city, day, time, service) if it's missing from the newest message.
@@ -84,14 +84,16 @@ async def chat_with_bot(request: ChatRequest):
     IMPORTANT EXTRACTION RULES FOR THE NEWEST MESSAGE:
     - intent: "search" or "book"
     - city: Extract the city name. Leave as "" if totally unknown. DO NOT write "Unknown".
-    - day: If they ask "which days", "show days", "all days", or "what days", YOU MUST OUTPUT "ALL". 
+    - day: If they ask "which days", "show days", "available days", "days and timings", or "what days", YOU MUST OUTPUT "ALL". 
            If they say "today", output "{current_day}".
            If they say "tomorrow", output "{tomorrow_day}".
            If they specify a single day (e.g., "MONDAY"), output that day. Otherwise "UNKNOWN".
-    - time: If they specify a time, extract it in 24-hour HH:MM format (e.g., "08:10", "14:00"). If they ask "all times", use "ALL". Otherwise "UNKNOWN".
+    - time: If they specify a time, extract it in 24-hour HH:MM format. 
+            If they ask "all times", "show timings", "available timings", or "days and timings", YOU MUST OUTPUT "ALL". 
+            Otherwise "UNKNOWN".
     - service: Extract specific doctor types if mentioned (e.g. "Dentist", "General"). Otherwise "unknown".
     - asking_for_doctors: Set to true ONLY IF the NEWEST user message asks "which doctors are available?". Otherwise false.
-    - asking_for_cities: Set to true ONLY IF the user explicitly asks a question to list cities (e.g., "what cities?", "which locations?"). If the user mentions a specific city (like "Amsterdam"), this MUST be false.
+    - asking_for_cities: Set to true ONLY IF the user explicitly asks a question to list cities. If they mention a specific city, false.
     - patient_name: e.g., "Fahad" (default "")
     - phone_number: e.g., "12345" (default "")
 
@@ -199,8 +201,10 @@ async def chat_with_bot(request: ChatRequest):
     if not all_city_slots:
         return {"status": "success", "message": f"I apologize, but all slots are currently booked for that selection.", "slots": []}
 
+    day_order = {"MONDAY": 1, "TUESDAY": 2, "WEDNESDAY": 3, "THURSDAY": 4, "FRIDAY": 5, "SATURDAY": 6, "SUNDAY": 7}
+
+    # SHOW JUST DAYS (If User asked for Days only)
     if target_day == "ALL" and target_time != "ALL":
-        day_order = {"MONDAY": 1, "TUESDAY": 2, "WEDNESDAY": 3, "THURSDAY": 4, "FRIDAY": 5, "SATURDAY": 6, "SUNDAY": 7}
         unique_days = sorted(list(set([s["day"] for s in all_city_slots])), key=lambda x: day_order.get(x, 8))
         days_str = ", ".join(unique_days) if unique_days else "various days"
         return {
@@ -209,14 +213,22 @@ async def chat_with_bot(request: ChatRequest):
             "slots": []
         }
 
+    # SHOW DAYS AND ALL TIMINGS (If User asked for both)
     if target_day == "ALL" and target_time == "ALL":
-        return {"status": "success", "message": "Here are all the available time slots:", "slots": day_slots}
+        return {"status": "success", "message": "Here are all the available days and their time slots:", "slots": all_city_slots}
 
     if target_day == "UNKNOWN":
         return {"status": "success", "message": "Great! Which day and time slot do you prefer?", "slots": []}
 
+    # USER CHOSE A DAY, BUT IT IS UNAVAILABLE
     if target_day != "ALL" and not day_slots:
-        return {"status": "success", "message": f"I'm sorry, but we don't have any available slots on {target_day}. Here are all available slots for other days:", "slots": all_city_slots}
+        unique_other_days = sorted(list(set([s["day"] for s in all_city_slots])), key=lambda x: day_order.get(x, 8))
+        if unique_other_days:
+            days_str = ", ".join(unique_other_days)
+            # Notice we pass empty slots `[]` here so it doesn't dump buttons!
+            return {"status": "success", "message": f"I'm sorry, but we don't have any available slots on {target_day}. We do have appointments available on **{days_str}**. Which day do you prefer?", "slots": []}
+        else:
+            return {"status": "success", "message": f"I'm sorry, but we don't have any available slots on {target_day}.", "slots": []}
 
     if target_time == "UNKNOWN":
         return {"status": "success", "message": f"Got it, {target_day}. Which time slot do you prefer?", "slots": []}
